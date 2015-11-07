@@ -5,14 +5,12 @@ const FlatButton = require('material-ui/lib/flat-button');
 const IconButton = require('material-ui/lib/icon-button');
 const FontAwesome = require('react-fontawesome');
 
-
 class Navbar extends React.Component {
 
   render() {
     return (
       <AppBar
-        title="Contributions"
-        //iconElementLeft={<IconButton></IconButton>}
+        title="Mailbox"
         iconElementRight={
             <FlatButton
               linkButton={true}
@@ -32,10 +30,6 @@ class Navbar extends React.Component {
 
 module.exports = Navbar;
 
-//<FlatButton label={<FontAwesome name='rocket' />}/>
-//<FlatButton linkButton={true} href="https://github.com/callemall/material-ui" secondary={true} label={<FontAwesome name='rocket' />}>
-//
-//</FlatButton>
 
 
 

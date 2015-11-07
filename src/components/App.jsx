@@ -6,6 +6,9 @@ let mui = require('material-ui');
 let Navbar = require('./Navbar.jsx');
 let Regions = require('./../stores/Regions');
 
+let Chart = require('./Chart.jsx');
+let CordChart = require('./charts/CordChart');
+
 const ThemeManager = new mui.Styles.ThemeManager();
 
 export default class App extends React.Component {
@@ -36,7 +39,7 @@ export default class App extends React.Component {
                 <Navbar/>
 
                 <div className='content'>
-                    {this.state.regions}
+                    <Chart renderer={CordChart} data={this.state.regions}/>
                 </div>
             </div>
         );
