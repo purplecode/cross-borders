@@ -26,9 +26,7 @@ export default class App extends React.Component {
 
     componentDidMount() {
         Regions.getRegions().then((regions) => {
-            if (this.isMounted()) {
-                this.setState({regions: regions});
-            }
+            this.setState({regions: regions});
         });
     }
 
