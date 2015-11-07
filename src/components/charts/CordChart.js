@@ -1,153 +1,117 @@
 let d3 = require('d3');
 let queue = require('./Queue');
 
+require('./cordChart.less');
+
 export default class CordChart {
     constructor(element) {
         this.element = element;
     }
 
     render(model) {
-        var w = 1000,
-            h = 600,
-            r1 = Math.min(w, h) / 2 - 4,
-            r0 = r1 - 20,
-            format = d3.format(",.3r");
+        var matrix = [
+            [11975, 5871, 8916, 2868],
+            [1951, 10048, 2060, 6171],
+            [8010, 16145, 8090, 8045],
+            [1013, 990, 940, 6907]
+        ];
 
-        var debits = [], credits = [];
-
-        var layout = d3.layout.chord()
-            .sortGroups(d3.descending)
+        var chord = d3.layout.chord()
+            .padding(.05)
             .sortSubgroups(d3.descending)
-            .sortChords(d3.descending)
-            .padding(.04);
+            .matrix(matrix);
+
+        var width = 960,
+            height = 500,
+            innerRadius = Math.min(width, height) * .41,
+            outerRadius = innerRadius * 1.1;
 
         var fill = d3.scale.ordinal()
-            .domain([0, 1, 2])
-            .range(["#DB704D", "#D2D0C6", "#ECD08D", "#F8EDD3"]);
+            .domain(d3.range(4))
+            .range(["#000000", "#FFDD89", "#957244", "#F26223"]);
 
-        var arc = d3.svg.arc()
-            .innerRadius(r0)
-            .outerRadius(r1);
+        var svg = d3.select(this.element).append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .append("g")
+            .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-        var chord = d3.svg.chord()
-            .radius(r0);
+        svg.append("g").selectAll("path")
+            .data(chord.groups)
+            .enter().append("path")
+            .style("fill", function (d) {
+                return fill(d.index);
+            })
+            .style("stroke", function (d) {
+                return fill(d.index);
+            })
+            .attr("d", d3.svg.arc().innerRadius(innerRadius).outerRadius(outerRadius))
+            .on("mouseover", fade(.1))
+            .on("mouseout", fade(1));
 
-        var svg = d3.select(this.element)
-            .data([debits, credits])
-            .enter().append("div")
-            .style("display", "inline-block")
-            .style("width", w + "px")
-            .style("height", h + "px")
-            .append("svg:svg")
-            .attr("width", w)
-            .attr("height", h)
-            .append("svg:g")
-            .attr("transform", "translate(" + w / 2 + "," + h / 2 + ")");
-
-        d3.csv("data/debt.csv", function (data) {
-            var countries = {},
-                array = [],
-                n = 0;
-
-            // Compute a unique id for each country.
-            data.forEach(function (d) {
-                d.creditor = country(d.creditor);
-                d.debtor = country(d.debtor);
-                d.debtor.risk = d.risk;
-                d.valueOf = value; // convert object to number implicitly
+        var ticks = svg.append("g").selectAll("g")
+            .data(chord.groups)
+            .enter().append("g").selectAll("g")
+            .data(groupTicks)
+            .enter().append("g")
+            .attr("transform", function (d) {
+                return "rotate(" + (d.angle * 180 / Math.PI - 90) + ")"
+                    + "translate(" + outerRadius + ",0)";
             });
 
-            // Initialize a square matrix of debits and credits.
-            for (var i = 0; i < n; i++) {
-                debits[i] = [];
-                credits[i] = [];
-                for (var j = 0; j < n; j++) {
-                    debits[i][j] = 0;
-                    credits[i][j] = 0;
-                }
-            }
+        ticks.append("line")
+            .attr("x1", 1)
+            .attr("y1", 0)
+            .attr("x2", 5)
+            .attr("y2", 0)
+            .style("stroke", "#000");
 
-            // Populate the matrices, and stash a map from id to country.
-            data.forEach(function (d) {
-                debits[d.creditor.id][d.debtor.id] = d;
-                credits[d.debtor.id][d.creditor.id] = d;
-                array[d.creditor.id] = d.creditor;
-                array[d.debtor.id] = d.debtor;
+        ticks.append("text")
+            .attr("x", 8)
+            .attr("dy", ".35em")
+            .attr("transform", function (d) {
+                return d.angle > Math.PI ? "rotate(180)translate(-16)" : null;
+            })
+            .style("text-anchor", function (d) {
+                return d.angle > Math.PI ? "end" : null;
+            })
+            .text(function (d) {
+                return d.label;
             });
 
-            // For each diagram…
-            svg.each(function (matrix, j) {
-                var svg = d3.select(this);
+        svg.append("g")
+            .attr("class", "chord")
+            .selectAll("path")
+            .data(chord.chords)
+            .enter().append("path")
+            .attr("d", d3.svg.chord().radius(innerRadius))
+            .style("fill", function (d) {
+                return fill(d.target.index);
+            })
+            .style("opacity", 1);
 
-                // Compute the chord layout.
-                layout.matrix(matrix);
+// Returns an array of tick angles and labels, given a group.
+        function groupTicks(d) {
+            var k = (d.endAngle - d.startAngle) / d.value;
+            return d3.range(0, d.value, 1000).map(function (v, i) {
+                return {
+                    angle: v * k + d.startAngle,
+                    label: i % 5 ? null : v / 1000 + "k"
+                };
+            });
+        }
 
-                // Add chords.
-                svg.selectAll("path.chord")
-                    .data(layout.chords)
-                    .enter().append("svg:path")
-                    .attr("class", "chord")
-                    .style("fill", function (d) {
-                        return fill(d.source.value.risk);
-                    })
-                    .style("stroke", function (d) {
-                        return d3.rgb(fill(d.source.value.risk)).darker();
-                    })
-                    .attr("d", chord)
-                    .append("svg:title")
-                    .text(function (d) {
-                        return d.source.value.debtor.name + " owes " + d.source.value.creditor.name + " $" + format(d.source.value) + "B.";
-                    });
-
-                // Add groups.
-                var g = svg.selectAll("g.group")
-                    .data(layout.groups)
-                    .enter().append("svg:g")
-                    .attr("class", "group");
-
-                // Add the group arc.
-                g.append("svg:path")
-                    .style("fill", function (d) {
-                        return fill(array[d.index].risk);
-                    })
-                    .attr("id", function (d, i) {
-                        return "group" + d.index + "-" + j;
-                    })
-                    .attr("d", arc)
-                    .append("svg:title")
-                    .text(function (d) {
-                        return array[d.index].name + " " + (j ? "owes" : "is owed") + " $" + format(d.value) + "B.";
-                    });
-
-                // Add the group label (but only for large groups, where it will fit).
-                // An alternative labeling mechanism would be nice for the small groups.
-                g.append("svg:text")
-                    .attr("x", 6)
-                    .attr("dy", 15)
+// Returns an event handler for fading a given chord group.
+        function fade(opacity) {
+            return function (g, i) {
+                svg.selectAll(".chord path")
                     .filter(function (d) {
-                        return d.value > 110;
+                        return d.source.index != i && d.target.index != i;
                     })
-                    .append("svg:textPath")
-                    .attr("xlink:href", function (d) {
-                        return "#group" + d.index + "-" + j;
-                    })
-                    .text(function (d) {
-                        return array[d.index].name;
-                    });
-            });
+                    .transition()
+                    .style("opacity", opacity);
+            };
+        }
 
-            // Memoize the specified country, computing a unique id.
-            function country(d) {
-                return countries[d] || (countries[d] = {
-                        name: d,
-                        id: n++
-                    });
-            }
-
-            // Converts a debit object to its primitive numeric value.
-            function value() {
-                return +this.amount;
-            }
-        });
     }
 }
