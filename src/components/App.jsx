@@ -8,8 +8,11 @@ let Regions = require('./../stores/Regions');
 
 let Chart = require('./Chart.jsx');
 let CordChart = require('./charts/CordChart');
+let UiPalette = require('./../constants/UiPalette');
 
-const ThemeManager = new mui.Styles.ThemeManager();
+let ThemeManager = require('material-ui/lib/styles/theme-manager');
+let themeManager = new ThemeManager();
+themeManager.setPalette(UiPalette);
 
 export default class App extends React.Component {
 
@@ -23,7 +26,7 @@ export default class App extends React.Component {
 
     getChildContext() {
         return {
-            muiTheme: ThemeManager.getCurrentTheme()
+            muiTheme: themeManager.getCurrentTheme()
         };
     }
 
