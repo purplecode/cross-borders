@@ -8,6 +8,7 @@ let Regions = require('./../stores/Regions');
 
 let Chart = require('./Chart.jsx');
 let CordChart = require('./charts/CordChart');
+let RegionCard = require('./RegionCard.jsx');
 let UiPalette = require('./../constants/UiPalette');
 
 let ThemeManager = require('material-ui/lib/styles/theme-manager');
@@ -20,7 +21,7 @@ export default class App extends React.Component {
         super(props);
         this.state = {
             regions: [],
-            regionsConnections: []
+            connections: []
         };
     }
 
@@ -31,8 +32,11 @@ export default class App extends React.Component {
     }
 
     componentDidMount() {
-        Regions.getRegions().then((regions) => {
-            this.setState({regions: regions});
+        Promise.all([Regions.getRegions(), Regions.getConnections()]).then((result) => {
+            this.setState({
+                regions: result[0],
+                connections: result[1]
+            });
         });
     }
 
@@ -42,7 +46,18 @@ export default class App extends React.Component {
                 <Navbar/>
 
                 <div className='content'>
-                    <Chart renderer={CordChart} data={this.state.regions}/>
+                    <div className='content__left-panel'>
+                        <Chart renderer={CordChart} data={this.state.connections}/>
+                    </div>
+                    <div className='content__right-panel'>
+                        <div>
+                            {
+                                this.state.regions.map((region) => {
+                                    return <RegionCard region={region} connections={_.filter(this.state.connections, {x: region.key})}/>
+                                })
+                            }
+                        </div>
+                    </div>
                 </div>
             </div>
         );

@@ -10,7 +10,7 @@ class Navbar extends React.Component {
   render() {
     return (
       <AppBar
-        title="Mailbox"
+        title="Cross borders"
         iconElementRight={
             <FlatButton
               linkButton={true}

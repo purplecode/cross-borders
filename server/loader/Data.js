@@ -11,9 +11,10 @@ function randomString(n) {
 
 function generateUser(n) {
     var id = randomString(n || 1);
+    var regions = ['Poland', 'England', 'France', 'Russia', 'Germany'];
     return {
         id: id,
-        region: id[0]
+        region: regions[Math.floor(Math.random() * regions.length) % regions.length]
     };
 }
 
@@ -54,18 +55,33 @@ function getRegionConnections(usersConnections) {
             });
         }
     }
-    return result;
+    return _.sortByOrder(result, ['x', 'count'], ['asc', 'desc']);
+}
+
+
+function getRegions(users, connections) {
+    var regions = _.uniq(_.pluck(users, 'region'));
+    regions = regions.map((region) => {
+        return {
+            key: region,
+            count: _.sum(_.filter(connections, {x: region}), (connection) => {
+                return connection.count
+            })
+        };
+    });
+    return _.sortByOrder(regions, 'count', 'desc');
 }
 
 export default {
     getData: function () {
         var users = generateUsers(10);
-        var connections = generateConnections(users);
+        var usersConnections = generateConnections(users);
+        var regionConnections = getRegionConnections(usersConnections);
         return {
             users: users,
-            usersConnections: connections,
-            regions: _.uniq(_.pluck(users, 'region')),
-            regionConnections: getRegionConnections(connections)
+            usersConnections: usersConnections,
+            regions: getRegions(users, regionConnections),
+            regionConnections: regionConnections
         };
     }
 };
