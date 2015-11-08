@@ -4,38 +4,58 @@ let Colors = require('./../../constants/Colors');
 
 require('./cordChart.less');
 
+class CordChartModel {
+    constructor(data) {
 
-export default class CordChart {
-    constructor(element) {
-        this.element = element;
     }
 
-    render(model) {
-        var matrix = [
+    getLabel(d) {
+        return ['Poland', 'Russia', 'USA', 'England'][d.index];
+    }
+
+    getTitle(d) {
+        return ['Poland', 'Russia', 'USA', 'England'][d.index] + ' ' + d.value;
+    }
+
+    getMatrix() {
+        return [
             [11975, 5871, 8916, 2868],
             [1951, 10048, 2060, 6171],
             [8010, 16145, 8090, 8045],
             [1013, 990, 940, 6907]
         ];
+    }
+}
 
-        var chord = d3.layout.chord()
+export default class CordChartView {
+    constructor(element, width = 1000, height = 500) {
+        this.element = element
+        this.width = width;
+        this.height = height;
+    }
+
+    render(data) {
+
+        var model = new CordChartModel(data);
+
+        var layout = d3.layout.chord()
             .padding(.05)
             .sortSubgroups(d3.descending)
-            .matrix(matrix);
+            .matrix(model.getMatrix());
 
-        var width = 960,
-            height = 500,
-            innerRadius = Math.min(width, height) * .41,
+        var innerRadius = Math.min(this.width, this.height) * .41,
             outerRadius = innerRadius * 1.1;
 
+        d3.select(this.element).select("svg").remove();
+
         var svg = d3.select(this.element).append("svg")
-            .attr("width", width)
-            .attr("height", height)
+            .attr("width", this.width)
+            .attr("height", this.height)
             .append("g")
-            .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+            .attr("transform", "translate(" + this.width / 2 + "," + this.height / 2 + ")");
 
         let group = svg.append("g").selectAll("path")
-            .data(chord.groups)
+            .data(layout.groups)
             .enter().append("g")
             .attr("class", "group")
             .on("mouseover", fade(.1))
@@ -48,11 +68,13 @@ export default class CordChart {
             .style("stroke", function (d) {
                 return Colors.getColor(d.index);
             })
-            .attr("id", function(d) { return "group" + d.index; })
+            .attr("id", function (d) {
+                return "group" + d.index;
+            })
             .attr("d", d3.svg.arc().innerRadius(innerRadius).outerRadius(outerRadius));
 
-        group.append("title").text(function(d, i) {
-            return'DUPA';
+        group.append("title").text(function (d) {
+            return model.getTitle(d);
         });
 
         group.append("svg:text")
@@ -60,45 +82,17 @@ export default class CordChart {
             .attr("dy", 15)
             //.filter(function(d) { return d.value > 110; })
             .append("svg:textPath")
-            .attr("xlink:href", function(d) { return "#group" + d.index; })
-            .text(function(d) { return 'asasasas'; });
-
-        //
-        //
-        //var ticks = svg.append("g").selectAll("g")
-        //    .data(chord.groups)
-        //    .enter().append("g").selectAll("g")
-        //    .data(groupTicks)
-        //    .enter().append("g")
-        //    .attr("transform", function (d) {
-        //        return "rotate(" + (d.angle * 180 / Math.PI - 90) + ")"
-        //            + "translate(" + outerRadius + ",0)";
-        //    });
-        //
-        //ticks.append("line")
-        //    .attr("x1", 1)
-        //    .attr("y1", 0)
-        //    .attr("x2", 5)
-        //    .attr("y2", 0)
-        //    .style("stroke", "#000");
-        //
-        //ticks.append("text")
-        //    .attr("x", 8)
-        //    .attr("dy", ".35em")
-        //    .attr("transform", function (d) {
-        //        return d.angle > Math.PI ? "rotate(180)translate(-16)" : null;
-        //    })
-        //    .style("text-anchor", function (d) {
-        //        return d.angle > Math.PI ? "end" : null;
-        //    })
-        //    .text(function (d) {
-        //        return d.label;
-        //    });
+            .attr("xlink:href", function (d) {
+                return "#group" + d.index;
+            })
+            .text(function (d) {
+                return model.getLabel(d);
+            });
 
         svg.append("g")
             .attr("class", "chord")
             .selectAll("path")
-            .data(chord.chords)
+            .data(layout.chords)
             .enter().append("path")
             .attr("d", d3.svg.chord().radius(innerRadius))
             .style("fill", function (d) {
@@ -106,18 +100,6 @@ export default class CordChart {
             })
             .style("opacity", 1);
 
-// Returns an array of tick angles and labels, given a group.
-        function groupTicks(d) {
-            var k = (d.endAngle - d.startAngle) / d.value;
-            return d3.range(0, d.value, 1000).map(function (v, i) {
-                return {
-                    angle: v * k + d.startAngle,
-                    label: i % 5 ? null : v / 1000 + "k"
-                };
-            });
-        }
-
-// Returns an event handler for fading a given chord group.
         function fade(opacity) {
             return function (g, i) {
                 svg.selectAll(".chord path")
