@@ -98,7 +98,13 @@ export default class CordChartView {
             .style("fill", function (d) {
                 return Colors.getColor(d.target.index);
             })
-            .style("opacity", 1);
+            .style("opacity", 1).append("svg:title")
+            .text(function (d) {
+                return `${model.getLabel(d.source)} -> ${model.getLabel(d.target)} = ${d.source.value}\n`
+                    + `${model.getLabel(d.target)} -> ${model.getLabel(d.source)} = ${d.target.value}`;
+            });
+        ;
+
 
         function fade(opacity) {
             return function (g, i) {
