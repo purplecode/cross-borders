@@ -1,7 +1,9 @@
 let d3 = require('d3');
 let queue = require('./Queue');
+let Colors = require('./../../constants/Colors');
 
 require('./cordChart.less');
+
 
 export default class CordChart {
     constructor(element) {
@@ -26,58 +28,72 @@ export default class CordChart {
             innerRadius = Math.min(width, height) * .41,
             outerRadius = innerRadius * 1.1;
 
-        var fill = d3.scale.ordinal()
-            .domain(d3.range(4))
-            .range(["#000000", "#FFDD89", "#957244", "#F26223"]);
-
         var svg = d3.select(this.element).append("svg")
             .attr("width", width)
             .attr("height", height)
             .append("g")
             .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-        svg.append("g").selectAll("path")
+        let group = svg.append("g").selectAll("path")
             .data(chord.groups)
-            .enter().append("path")
-            .style("fill", function (d) {
-                return fill(d.index);
-            })
-            .style("stroke", function (d) {
-                return fill(d.index);
-            })
-            .attr("d", d3.svg.arc().innerRadius(innerRadius).outerRadius(outerRadius))
+            .enter().append("g")
+            .attr("class", "group")
             .on("mouseover", fade(.1))
             .on("mouseout", fade(1));
 
-        var ticks = svg.append("g").selectAll("g")
-            .data(chord.groups)
-            .enter().append("g").selectAll("g")
-            .data(groupTicks)
-            .enter().append("g")
-            .attr("transform", function (d) {
-                return "rotate(" + (d.angle * 180 / Math.PI - 90) + ")"
-                    + "translate(" + outerRadius + ",0)";
-            });
-
-        ticks.append("line")
-            .attr("x1", 1)
-            .attr("y1", 0)
-            .attr("x2", 5)
-            .attr("y2", 0)
-            .style("stroke", "#000");
-
-        ticks.append("text")
-            .attr("x", 8)
-            .attr("dy", ".35em")
-            .attr("transform", function (d) {
-                return d.angle > Math.PI ? "rotate(180)translate(-16)" : null;
+        group.append("path")
+            .style("fill", function (d) {
+                return Colors.getColor(d.index);
             })
-            .style("text-anchor", function (d) {
-                return d.angle > Math.PI ? "end" : null;
+            .style("stroke", function (d) {
+                return Colors.getColor(d.index);
             })
-            .text(function (d) {
-                return d.label;
-            });
+            .attr("id", function(d) { return "group" + d.index; })
+            .attr("d", d3.svg.arc().innerRadius(innerRadius).outerRadius(outerRadius));
+
+        group.append("title").text(function(d, i) {
+            return'DUPA';
+        });
+
+        group.append("svg:text")
+            .attr("x", 6)
+            .attr("dy", 15)
+            //.filter(function(d) { return d.value > 110; })
+            .append("svg:textPath")
+            .attr("xlink:href", function(d) { return "#group" + d.index; })
+            .text(function(d) { return 'asasasas'; });
+
+        //
+        //
+        //var ticks = svg.append("g").selectAll("g")
+        //    .data(chord.groups)
+        //    .enter().append("g").selectAll("g")
+        //    .data(groupTicks)
+        //    .enter().append("g")
+        //    .attr("transform", function (d) {
+        //        return "rotate(" + (d.angle * 180 / Math.PI - 90) + ")"
+        //            + "translate(" + outerRadius + ",0)";
+        //    });
+        //
+        //ticks.append("line")
+        //    .attr("x1", 1)
+        //    .attr("y1", 0)
+        //    .attr("x2", 5)
+        //    .attr("y2", 0)
+        //    .style("stroke", "#000");
+        //
+        //ticks.append("text")
+        //    .attr("x", 8)
+        //    .attr("dy", ".35em")
+        //    .attr("transform", function (d) {
+        //        return d.angle > Math.PI ? "rotate(180)translate(-16)" : null;
+        //    })
+        //    .style("text-anchor", function (d) {
+        //        return d.angle > Math.PI ? "end" : null;
+        //    })
+        //    .text(function (d) {
+        //        return d.label;
+        //    });
 
         svg.append("g")
             .attr("class", "chord")
@@ -86,7 +102,7 @@ export default class CordChart {
             .enter().append("path")
             .attr("d", d3.svg.chord().radius(innerRadius))
             .style("fill", function (d) {
-                return fill(d.target.index);
+                return Colors.getColor(d.target.index);
             })
             .style("opacity", 1);
 
