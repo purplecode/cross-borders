@@ -14,7 +14,7 @@ class CordChartModel {
     }
 
     getTitle(d) {
-        return ['Poland', 'Russia', 'USA', 'England'][d.index] + ' ' + d.value;
+        return ['Poland', 'Russia', 'USA', 'England'][d.index] + ' ' + d.value.toFixed(0);
     }
 
     getMatrix() {
@@ -28,7 +28,7 @@ class CordChartModel {
 }
 
 export default class CordChartView {
-    constructor(element, width = 1000, height = 500) {
+    constructor(element, width = 800, height = 800) {
         this.element = element
         this.width = width;
         this.height = height;
