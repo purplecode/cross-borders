@@ -21,6 +21,7 @@
     "moment": "^2.10.6",
     "react": "^0.14.2",
     "react-chartjs": "^0.6.0",
+    "react-flags": "^0.1.7",
     "react-fontawesome": "^0.3.3",
     "react-tap-event-plugin": "^0.1.7",
     "style-loader": "^0.12.4",

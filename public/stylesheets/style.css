@@ -34,7 +34,7 @@ div.tooltip {
 }
 
 .content > .content__right-panel {
-    flex-grow: 4;
+    width: 400px;
 }
 
 .content > .content__left-panel {

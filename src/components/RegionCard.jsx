@@ -18,6 +18,8 @@ let TableHeaderColumn = require('material-ui/lib/table/table-header-column');
 let TableBody = require('material-ui/lib/table/table-body');
 let TableFooter = require('material-ui/lib/table/table-footer');
 
+let Flag = require("react-flags");
+
 let Colors = require('../constants/Colors');
 
 require('./regionCard.less');
@@ -29,7 +31,7 @@ export default class RegionCard extends React.Component {
         return (
             <Card initiallyExpanded={false} className="region-card">
                 <CardHeader
-                    title={this.props.region.key}
+                    title={this.props.region.name}
                     subtitle={"Total outgoing: " + this.props.region.count}
                     avatar={<Avatar backgroundColor={Colors.getColor(this.props.region.key)}></Avatar>}
                     actAsExpander={true}
@@ -48,9 +50,17 @@ export default class RegionCard extends React.Component {
                             showRowHover={true}
                             stripedRows={false}>
                             {
-                                this.props.connections.map( (connection) => {
+                                this.props.connections.map((connection) => {
                                     return <TableRow>
-                                        <TableRowColumn>{connection.y}</TableRowColumn>
+                                        <TableRowColumn>
+                                            <Flag
+                                                name={connection.y.key}
+                                                format="png"
+                                                pngSize={32}
+                                                shiny={false}
+                                                />
+                                        </TableRowColumn>
+                                        <TableRowColumn>{connection.y.name}</TableRowColumn>
                                         <TableRowColumn>{connection.count}</TableRowColumn>
                                     </TableRow>
                                 })

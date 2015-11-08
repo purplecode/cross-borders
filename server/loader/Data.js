@@ -9,18 +9,25 @@ function randomString(n) {
     return text;
 }
 
+var REGIONS = [
+    {name: 'Poland', key: 'PL'},
+    {name: 'England', key: 'GB'},
+    {name: 'France', key: 'FR'},
+    {name: 'Russia', key: 'RU'},
+    {name: 'Germany', key: 'DE'}
+];
+
 function generateUser(n) {
-    var id = randomString(n || 1);
-    var regions = ['Poland', 'England', 'France', 'Russia', 'Germany'];
+    var username = randomString(n || 1);
     return {
-        id: id,
-        region: regions[Math.floor(Math.random() * regions.length) % regions.length]
+        username: username,
+        region: REGIONS[Math.floor(Math.random() * REGIONS.length) % REGIONS.length]
     };
 }
 
 function generateUsers(n) {
     return new Array(n).join().split(',').map(function () {
-        return generateUser(4);
+        return generateUser(10);
     });
 }
 
@@ -41,7 +48,7 @@ function generateConnections(users) {
 function getRegionConnections(usersConnections) {
     var cache = {};
     usersConnections.forEach(function (connection) {
-        var path = connection.x.region + '.' + connection.y.region;
+        var path = connection.x.region.key + '.' + connection.y.region.key;
         _.set(cache, path, _.get(cache, path, 0) + connection.count);
     });
 
@@ -49,9 +56,9 @@ function getRegionConnections(usersConnections) {
     for (var region1 in cache) {
         for (var region2 in cache[region1]) {
             result.push({
-                x: region1,
-                y: region2,
-                count: cache[region1][region2]
+                x: _.first(_.filter(REGIONS, {key: region1})),
+                y: _.first(_.filter(REGIONS, {key: region2})),
+                count: cache[region1][region2] || 0
             });
         }
     }
@@ -60,14 +67,14 @@ function getRegionConnections(usersConnections) {
 
 
 function getRegions(users, connections) {
-    var regions = _.uniq(_.pluck(users, 'region'));
-    regions = regions.map((region) => {
-        return {
-            key: region,
-            count: _.sum(_.filter(connections, {x: region}), (connection) => {
+    let regions = REGIONS.map((region) => {
+        return _.extend({
+            count: _.sum(_.filter(connections, (connection) => {
+                return connection.x.key === region.key;
+            }), (connection) => {
                 return connection.count
             })
-        };
+        }, region);
     });
     return _.sortByOrder(regions, 'count', 'desc');
 }

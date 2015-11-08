@@ -53,7 +53,9 @@ export default class App extends React.Component {
                         <div>
                             {
                                 this.state.regions.map((region) => {
-                                    return <RegionCard region={region} connections={_.filter(this.state.connections, {x: region.key})}/>
+                                    return <RegionCard
+                                        region={region}
+                                        connections={_.filter(this.state.connections, (connection) => { return connection.x.key === region.key; })}/>
                                 })
                             }
                         </div>
@@ -67,5 +69,4 @@ export default class App extends React.Component {
 App.childContextTypes = {
     muiTheme: React.PropTypes.object
 };
-
 
