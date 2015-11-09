@@ -1,4 +1,5 @@
 let d3 = require('d3');
+let _ = require('lodash');
 let queue = require('./Queue');
 let Colors = require('./../../constants/Colors');
 
@@ -6,24 +7,40 @@ require('./cordChart.less');
 
 class CordChartModel {
     constructor(data) {
-
+        this.data = data;
+        this.regions = _.uniq(_.pluck(data, 'x'), (region) => {
+            return region.key;
+        });
+        this.regionsIdx = _.reduce(this.regions, (memo, region, idx) => {
+            memo[region.key] = idx;
+            return memo;
+        }, {});
     }
 
     getLabel(d) {
-        return ['Poland', 'Russia', 'USA', 'England'][d.index];
+        return this.regions[d.index].name;
     }
 
     getTitle(d) {
-        return ['Poland', 'Russia', 'USA', 'England'][d.index] + ' ' + d.value.toFixed(0);
+        return this.getLabel(d) + ' ' + d.value.toFixed(0);
+    }
+
+    getColor(d) {
+        return Colors.getColor(this.regions[d.index].key);
     }
 
     getMatrix() {
-        return [
-            [11975, 5871, 8916, 2868],
-            [1951, 10048, 2060, 6171],
-            [8010, 16145, 8090, 8045],
-            [1013, 990, 940, 6907]
-        ];
+        let matrix = [];
+        // initialize 0's
+        this.regions.forEach(() => {
+            matrix.push(_.range(0, this.regions.length, 0));
+        });
+        this.data.forEach((connection) => {
+            let x = this.regionsIdx[connection.x.key];
+            let y = this.regionsIdx[connection.y.key];
+            matrix[x][y] = connection.count;
+        });
+        return matrix;
     }
 }
 
@@ -63,10 +80,10 @@ export default class CordChartView {
 
         group.append("path")
             .style("fill", function (d) {
-                return Colors.getColor(d.index);
+                return model.getColor(d);
             })
             .style("stroke", function (d) {
-                return Colors.getColor(d.index);
+                return model.getColor(d);
             })
             .attr("id", function (d) {
                 return "group" + d.index;
@@ -96,7 +113,7 @@ export default class CordChartView {
             .enter().append("path")
             .attr("d", d3.svg.chord().radius(innerRadius))
             .style("fill", function (d) {
-                return Colors.getColor(d.target.index);
+                return model.getColor(d.target);
             })
             .style("opacity", 1).append("svg:title")
             .text(function (d) {

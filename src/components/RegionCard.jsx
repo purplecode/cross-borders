@@ -33,7 +33,15 @@ export default class RegionCard extends React.Component {
                 <CardHeader
                     title={this.props.region.name}
                     subtitle={"Total outgoing: " + this.props.region.count}
-                    avatar={<Avatar backgroundColor={Colors.getColor(this.props.region.key)}></Avatar>}
+                    avatar={
+                        <Avatar backgroundColor={Colors.getColor(this.props.region.key)}>
+                            <Flag
+                                name={this.props.region.key}
+                                format="png"
+                                pngSize={24}
+                                shiny={false}
+                            />
+                        </Avatar>}
                     actAsExpander={true}
                     showExpandableButton={true}>
                 </CardHeader>

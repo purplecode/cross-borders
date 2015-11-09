@@ -33,6 +33,9 @@ export default class App extends React.Component {
 
     componentDidMount() {
         Promise.all([Regions.getRegions(), Regions.getConnections()]).then((result) => {
+
+            console.log(result);
+
             this.setState({
                 regions: result[0],
                 connections: result[1]

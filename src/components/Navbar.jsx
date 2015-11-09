@@ -9,21 +9,7 @@ class Navbar extends React.Component {
 
   render() {
     return (
-      <AppBar
-        title="Cross borders"
-        iconElementRight={
-            <FlatButton
-              linkButton={true}
-              href="https://github.com/purplecode/contributions"
-              secondary={true}
-              label={
-                <FontAwesome
-                  name='github'
-                  size='2x'
-                />}
-            />
-          }
-        />
+      <AppBar title="Cross borders"/>
     )
   }
 }

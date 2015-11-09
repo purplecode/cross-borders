@@ -13,25 +13,27 @@ module.exports = (config) => {
 
     let router = express.Router();
 
+    let data = Data.getData();
+
     router.get('/', function (req, res) {
+        data = Data.getData();
         res.render('index');
     });
 
     router.get('/api/v1/users', function (req, res) {
-        res.send(Data.getData().users);
+        res.send(data.users);
     });
 
-
     router.get('/api/v1/users/connections', function (req, res) {
-        res.send(Data.getData().usersConnections);
+        res.send(data.usersConnections);
     });
 
     router.get('/api/v1/regions', function (req, res) {
-        res.send(Data.getData().regions);
+        res.send(data.regions);
     });
 
     router.get('/api/v1/regions/connections', function (req, res) {
-        res.send(Data.getData().regionConnections);
+        res.send(data.regionConnections);
     });
 
     return router;

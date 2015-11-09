@@ -35,6 +35,8 @@ div.tooltip {
 
 .content > .content__right-panel {
     width: 400px;
+    border-left: 1px solid lightgray;
+    height: calc(100vh - 64px);
 }
 
 .content > .content__left-panel {
