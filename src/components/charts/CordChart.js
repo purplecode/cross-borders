@@ -96,7 +96,7 @@ export default class CordChartView {
 
         group.append("svg:text")
             .attr("x", 6)
-            .attr("dy", 15)
+            .attr("dy", 20)
             //.filter(function(d) { return d.value > 110; })
             .append("svg:textPath")
             .attr("xlink:href", function (d) {
