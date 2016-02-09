@@ -1,14 +1,14 @@
-contributions
+react-poc
 =====================
 
-*under construction*
+Tiny react PoC. Nothing special.
 
 
 Usage
 =====
 
 ```
-git clone https://github.com/purplecode/contributions.git myapp
+git clone https://github.com/purplecode/react-poc.git myapp
 cd myapp
 npm install
 npm run build
